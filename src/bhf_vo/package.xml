@@ -4,10 +4,17 @@
   <name>bhf_vo</name>
   <version>0.0.0</version>
   <description>TODO: Package description</description>
-  <maintainer email="alimohammed2510@gmail.com">alikasim</maintainer>
+  <maintainer email="root@todo.todo">root</maintainer>
   <license>TODO: License declaration</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <depend>rclcpp</depend>
+  <depend>std_msgs</depend>
+  <depend>sensor_msgs</depend>
+  <depend>cv_bridge</depend>
+  <depend>image_transport</depend>
+  <depend>OpenCV</depend>
 
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>

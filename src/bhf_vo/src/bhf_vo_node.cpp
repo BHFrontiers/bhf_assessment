@@ -10,9 +10,9 @@ using namespace std::chrono_literals;
 
 class MinimalImagePublisher : public rclcpp::Node{
 public:
-    MinimalImagePublisher() : Node("opencv_image_publisher"), count_(0), cap(0){
+    MinimalImagePublisher() : Node("bhf_vo_image_publisher"), count_(0), cap(0){
 
-        publisher_ = this->create_publisher<sensor_msgs::msg::Image>("random_image", 10);
+        publisher_ = this->create_publisher<sensor_msgs::msg::Image>("bhf_vo_image", 10);
         timer_ = this->create_wall_timer(500ms, std::bind(&MinimalImagePublisher::timer_callback, this));
         cv::VideoCapture cap(0);
     }
@@ -34,8 +34,6 @@ void timer_callback() {
   rclcpp::Publisher<sensor_msgs::msg::Image>::SharedPtr publisher_;
   size_t count_;
   cv::VideoCapture cap;
-  cv::Mat prev_image_;
-
 };
 int main(int argc, char *argv[]){
 
