@@ -1,0 +1,11 @@
+services:
+  building:
+      build:
+        dockerfile: Dockerfile
+        #no_cache: true
+      image: bhf_vo:latest
+      container_name: building
+      privileged: true
+      network_mode: "host"
+      restart: unless-stopped
+      command: ros2 run bhf_vo bhf_vo_node.cpp
