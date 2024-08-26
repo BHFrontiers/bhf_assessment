@@ -31,3 +31,8 @@ RUN . /opt/ros/humble/setup.bash && \
 #Source Workspace
 RUN bash -c "source /opt/ros/humble/setup.bash && source /home/ros2_ws/install/setup.bash"
 
+#Entrypoint File
+WORKDIR /home/ros2_ws/src/bhf_assessment/docker
+RUN chmod +x entrypoint.sh
+
+ENTRYPOINT [ "/home/ros2_ws/src/bhf_assessment/docker/entrypoint.sh" ]
