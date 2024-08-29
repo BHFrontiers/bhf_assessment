@@ -13,7 +13,13 @@ find_package(sensor_msgs REQUIRED)
 find_package(cv_bridge REQUIRED)
 find_package(image_transport REQUIRED)
 find_package(OpenCV REQUIRED)
+find_package(rosidl_default_generators REQUIRED)
 
+# Declare the message files to be built
+rosidl_generate_interfaces(${PROJECT_NAME}
+  "msg/VisualCustom.msg"
+  DEPENDENCIES geometry_msgs  # Add other dependencies if needed
+)
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
   # the following line skips the linter which checks for copyrights
@@ -28,6 +34,10 @@ endif()
 
 add_executable(bhf_vo_node src/bhf_vo_node.cpp)
 ament_target_dependencies(bhf_vo_node rclcpp std_msgs sensor_msgs cv_bridge image_transport OpenCV)
+
+# Link the generated message files
+target_link_libraries(bhf_vo_node
+  ${PROJECT_NAME}__rosidl_typesupport_cpp)
 
 install(TARGETS bhf_vo_node
 DESTINATION lib/${PROJECT_NAME})
