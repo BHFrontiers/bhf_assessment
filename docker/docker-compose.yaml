@@ -1,0 +1,19 @@
+services:
+  building:
+      build:
+        dockerfile: Dockerfile
+        #no_cache: true
+      image: bhf_vo:latest
+      container_name: bhf_visual_odometry
+      privileged: true
+      network_mode: "host"
+      restart: unless-stopped
+      environment:
+       - DISPLAY+${DISPLAY}
+       - QT_X11_NO_MITSHM=1
+      devices:
+       - "/dev/dir:/dev/dir"
+      volumes:
+       - /tmp/.X11-unix:/tmp/.X11-unix:rw
+       - /tmp/.docker.xauth:/tmp/.docker.xauth:rw
+      command: ros2 run bhf_vo bhf_vo_node

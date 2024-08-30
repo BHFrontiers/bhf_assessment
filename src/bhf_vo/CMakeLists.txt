@@ -7,19 +7,19 @@ endif()
 
 # find dependencies
 find_package(ament_cmake REQUIRED)
-# uncomment the following section in order to fill in
-# further dependencies manually.
-# find_package(<dependency> REQUIRED)
+find_package(rclcpp REQUIRED)
+find_package(std_msgs REQUIRED)
+find_package(sensor_msgs REQUIRED)
+find_package(cv_bridge REQUIRED)
+find_package(image_transport REQUIRED)
+find_package(OpenCV REQUIRED)
+find_package(rosidl_default_generators REQUIRED)
 
-add_executable(bhf_vo_node src/bhf_vo_node.cpp)
-target_include_directories(bhf_vo_node PUBLIC
-  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-  $<INSTALL_INTERFACE:include>)
-target_compile_features(bhf_vo_node PUBLIC c_std_99 cxx_std_17)  # Require C99 and C++17
-
-install(TARGETS bhf_vo_node
-  DESTINATION lib/${PROJECT_NAME})
-
+# Declare the message files to be built
+rosidl_generate_interfaces(${PROJECT_NAME}
+  "msg/VisualCustom.msg"
+  DEPENDENCIES geometry_msgs  # Add other dependencies if needed
+)
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
   # the following line skips the linter which checks for copyrights
@@ -31,5 +31,15 @@ if(BUILD_TESTING)
   set(ament_cmake_cpplint_FOUND TRUE)
   ament_lint_auto_find_test_dependencies()
 endif()
+
+add_executable(bhf_vo_node src/bhf_vo_node.cpp)
+ament_target_dependencies(bhf_vo_node rclcpp std_msgs sensor_msgs cv_bridge image_transport OpenCV)
+
+# Link the generated message files
+target_link_libraries(bhf_vo_node
+  ${PROJECT_NAME}__rosidl_typesupport_cpp)
+
+install(TARGETS bhf_vo_node
+DESTINATION lib/${PROJECT_NAME})
 
 ament_package()
