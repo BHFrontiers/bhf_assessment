@@ -9,6 +9,8 @@ RUN apt-get update && apt-get install -y \
     git \
     ros-humble-cv-bridge \
     ros-humble-image-transport \
+    ros-humble-compressed_image_transport \
+    ros-humble-rqt-image-view \
     ros-humble-rclcpp \
     ros-humble-std-msgs \
     libopencv-dev \
