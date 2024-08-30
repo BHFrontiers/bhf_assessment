@@ -1,4 +1,4 @@
-FROM ros:humble-ros-core
+FROM osrf/ros:humble-desktop
 
 # Install packages
 RUN apt-get update && apt-get install -y \
@@ -7,6 +7,9 @@ RUN apt-get update && apt-get install -y \
     build-essential \
     cmake \
     git \
+    python3-pip \
+    python3-rosdep \
+    python3-rosinstall \
     python3-vcstool \
     ros-humble-cv-bridge \
     ros-humble-image-transport \
@@ -17,25 +20,25 @@ RUN apt-get update && apt-get install -y \
     libopencv-dev \
     python3-opencv \
     && rm -rf /var/lib/apt/lists/*
-
+    
+# Initialize rosdep if not already initialized
+RUN if [ ! -f /etc/ros/rosdep/sources.list.d/20-default.list ]; then \
+    rosdep init; \
+    fi
+    
+# Initialize rosdep
+RUN rosdep update
 
 # Setup a ROS2 workspace
 WORKDIR /home/ros2_ws/src
 RUN git clone https://github.com/Arif-Anjum/bhf_assessment.git
 
+# Install dependencies for the workspace
 WORKDIR /home/ros2_ws
+RUN rosdep install --from-paths src --ignore-src -r -y
 
-# Install dependencies
-RUN . /opt/ros/humble/setup.sh && \
-    apt-get update && \
-    rosdep init && \
-    rosdep update && \
-    rosdep install --from-paths src --ignore-src -r -y
-WORKDIR /home/ros2_ws
-
-#Build Packages
-RUN . /opt/ros/humble/setup.bash && \
-    colcon build
+# Build the workspace
+RUN . /opt/ros/humble/setup.sh && colcon build
 
 # Source the ROS 2 and workspace setup scripts
 RUN echo "source /opt/ros/humble/setup.bash" >> ~/.bashrc
