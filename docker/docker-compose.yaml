@@ -13,7 +13,7 @@ services:
        - QT_X11_NO_MITSHM=1
       devices:
        - "/dev/dir:/dev/dir"
-      volume:
+      volumes:
        - /tmp/.X11-unix:/tmp/.X11-unix:rw
        - /tmp/.docker.xauth:/tmp/.docker.xauth:rw
-      command: ros2 run bhf_vo bhf_vo_node.cpp
+      command: ros2 run bhf_vo bhf_vo_node
