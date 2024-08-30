@@ -26,6 +26,7 @@ private:
 
         try{
 
+            // Reading the Image-Data frame.
             cv::Mat image = cv::imdecode(cv::Mat(msg->data), cv::IMREAD_COLOR);
             
             if (image.empty()){
