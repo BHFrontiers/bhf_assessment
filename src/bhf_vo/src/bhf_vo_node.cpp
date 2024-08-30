@@ -15,23 +15,31 @@ public:
     MinimalImagePublisher() : Node("bhf_vo_image_publisher"), count_(0), cap(0){
 
         bhf_vo_pub_ = this->create_publisher<bhf_vo::msg::VisualCustom>("bhf_vo_data", 10); // Initialize the publisher
+        image_sub_ = this->create_subscription<sensor_msgs::msg::CompressedImage>(
+        "/camera/image_raw/compressed", 10, std::bind(&MinimalImagePublisher::imageCallback, this, std::placeholders::_1));
 
-        publisher_ = this->create_publisher<sensor_msgs::msg::Image>("bhf_vo_image", 10);
-        timer_ = this->create_wall_timer(500ms, std::bind(&MinimalImagePublisher::timer_callback, this));
-        cv::VideoCapture cap(0);
+        // publisher_ = this->create_publisher<sensor_msgs::msg::Image>("bhf_vo_image", 10);
+        // timer_ = this->create_wall_timer(500ms, std::bind(&MinimalImagePublisher::timer_callback, this));
+        // cv::VideoCapture cap(0);
     }
 
 private:
 
-void timer_callback() {
+// void timer_callback() {
 
-    cv_bridge::CvImagePtr cv_ptr;
+//     cv_bridge::CvImagePtr cv_ptr;
 
-    cv::Mat image(cv::Size(1280, 720), CV_8UC3);
-    cap >> image;
-    sensor_msgs::msg::Image::SharedPtr msg = cv_bridge::CvImage(std_msgs::msg::Header(), "bgr8", image).toImageMsg();
-    publisher_->publish(*msg);
-    RCLCPP_INFO(this->get_logger(), "publishing");
+//     cv::Mat image(cv::Size(1280, 720), CV_8UC3);
+//     cap >> image;
+//     sensor_msgs::msg::Image::SharedPtr msg = cv_bridge::CvImage(std_msgs::msg::Header(), "bgr8", image).toImageMsg();
+//     publisher_->publish(*msg);
+//     RCLCPP_INFO(this->get_logger(), "publishing");
+
+
+void imageCallback(const sensor_msgs::msg::CompressedImage::SharedPtr msg){
+
+    cv::Mat image = cv::imdecode(cv::Mat(msg->data), cv::IMREAD_COLOR);
+
 
 if (!prev_image_.empty()){
 
@@ -82,8 +90,9 @@ if (!prev_image_.empty()){
     prev_image_ = image.clone();
 
 } 
-  rclcpp::TimerBase::SharedPtr timer_;
-  rclcpp::Publisher<sensor_msgs::msg::Image>::SharedPtr publisher_;
+//   rclcpp::TimerBase::SharedPtr timer_;
+//   rclcpp::Publisher<sensor_msgs::msg::Image>::SharedPtr publisher_;
+  rclcpp::Subscription<sensor_msgs::msg::CompressedImage>::SharedPtr image_sub_;
   rclcpp::Publisher<bhf_vo::msg::VisualCustom>::SharedPtr bhf_vo_pub_; // Publisher declaration
   size_t count_;
   cv::VideoCapture cap;
