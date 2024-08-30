@@ -1,4 +1,4 @@
-FROM osrf/ros:humble-core
+FROM ros:humble-ros-core
 
 # Install packages
 RUN apt-get update && apt-get install -y \
@@ -10,7 +10,7 @@ RUN apt-get update && apt-get install -y \
     python3-vcstool \
     ros-humble-cv-bridge \
     ros-humble-image-transport \
-    ros-humble-compressed_image_transport \
+    ros-humble-compressed-image-transport \
     ros-humble-rqt-image-view \
     ros-humble-rclcpp \
     ros-humble-std-msgs \
