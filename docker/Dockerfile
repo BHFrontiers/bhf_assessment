@@ -7,6 +7,7 @@ RUN apt-get update && apt-get install -y \
     build-essential \
     cmake \
     git \
+    python3-vcstool \
     ros-humble-cv-bridge \
     ros-humble-image-transport \
     ros-humble-compressed_image_transport \
