@@ -12,36 +12,30 @@ using namespace std::chrono_literals;
 
 class MinimalImagePublisher : public rclcpp::Node{
 public:
-    MinimalImagePublisher() : Node("bhf_vo_image_publisher"), count_(0), cap(0){
+    MinimalImagePublisher() : Node("bhf_vo_image_publisher"){
 
-        bhf_vo_pub_ = this->create_publisher<bhf_vo::msg::VisualCustom>("bhf_vo_data", 10); // Initialize the publisher
-        image_sub_ = this->create_subscription<sensor_msgs::msg::CompressedImage>(
-        "/camera/image_raw/compressed", 10, std::bind(&MinimalImagePublisher::imageCallback, this, std::placeholders::_1));
+        RCLCPP_INFO(this->get_logger(), "Initialized Visual Odometry Node");
+        image_sub_ = this->create_subscription<sensor_msgs::msg::CompressedImage>("/camera/image_raw/compressed", 10, std::bind(&MinimalImagePublisher::imageCallback, this, std::placeholders::_1));
+        bhf_vo_pub_ = this->create_publisher<bhf_vo::msg::VisualCustom>("bhf_vo_data", 10);
 
-        // publisher_ = this->create_publisher<sensor_msgs::msg::Image>("bhf_vo_image", 10);
-        // timer_ = this->create_wall_timer(500ms, std::bind(&MinimalImagePublisher::timer_callback, this));
-        // cv::VideoCapture cap(0);
     }
 
 private:
 
-// void timer_callback() {
+    void imageCallback(const sensor_msgs::msg::CompressedImage::SharedPtr msg){
 
-//     cv_bridge::CvImagePtr cv_ptr;
+        try{
 
-//     cv::Mat image(cv::Size(1280, 720), CV_8UC3);
-//     cap >> image;
-//     sensor_msgs::msg::Image::SharedPtr msg = cv_bridge::CvImage(std_msgs::msg::Header(), "bgr8", image).toImageMsg();
-//     publisher_->publish(*msg);
-//     RCLCPP_INFO(this->get_logger(), "publishing");
+            cv::Mat image = cv::imdecode(cv::Mat(msg->data), cv::IMREAD_COLOR);
+            
+            if (image.empty()){
+                RCLCPP_ERROR(this->get_logger(), "Image Failed to load ......");
+                return;
+            }
+            
+            RCLCPP_INFO(this->get_logger(), "Ros Bag Data is loaded .......");
 
-
-void imageCallback(const sensor_msgs::msg::CompressedImage::SharedPtr msg){
-
-    cv::Mat image = cv::imdecode(cv::Mat(msg->data), cv::IMREAD_COLOR);
-
-
-if (!prev_image_.empty()){
+            if (!prev_image_.empty()){
 
                 // Detect features in the previous and current image
                 std::vector<cv::KeyPoint> keypoints_prev, keypoints_curr;
@@ -72,7 +66,7 @@ if (!prev_image_.empty()){
                 cv::Mat R, t;
                 cv::recoverPose(essential_matrix, points_prev, points_curr, R, t);
 
-                                // Prepare and publish the custom message
+                // Prepare and publish the custom message
                 bhf_vo::msg::VisualCustom bhf_vo_data_msg;
                 bhf_vo_data_msg.camera_pose.position.x = t.at<double>(0);
                 bhf_vo_data_msg.camera_pose.position.y = t.at<double>(1);
@@ -83,25 +77,24 @@ if (!prev_image_.empty()){
                     essential_matrix.at<double>(1, 0), essential_matrix.at<double>(1, 1), essential_matrix.at<double>(1, 2),
                     essential_matrix.at<double>(2, 0), essential_matrix.at<double>(2, 1), essential_matrix.at<double>(2, 2)
                 };
-                bhf_vo_pub_->publish(bhf_vo_data_msg); // Publish the VO data
-
-    
+                bhf_vo_pub_->publish(bhf_vo_data_msg);  
+            }   
+        
+        prev_image_ = image.clone();
+        }
+        
+        catch (const std::exception &e){
+            RCLCPP_INFO(this->get_logger(), "ERROR: In Loading Image: %s", e.what());
+        }
     }
-    prev_image_ = image.clone();
-
-} 
-//   rclcpp::TimerBase::SharedPtr timer_;
-//   rclcpp::Publisher<sensor_msgs::msg::Image>::SharedPtr publisher_;
+// Variable Declaration 
   rclcpp::Subscription<sensor_msgs::msg::CompressedImage>::SharedPtr image_sub_;
-  rclcpp::Publisher<bhf_vo::msg::VisualCustom>::SharedPtr bhf_vo_pub_; // Publisher declaration
-  size_t count_;
-  cv::VideoCapture cap;
+  rclcpp::Publisher<bhf_vo::msg::VisualCustom>::SharedPtr bhf_vo_pub_; 
   cv::Mat prev_image_;
 
 };
 int main(int argc, char *argv[]){
 
-    printf("Starting.......");
     rclcpp::init(argc, argv);
     auto node =std::make_shared<MinimalImagePublisher>();
     rclcpp::spin(node);

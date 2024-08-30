@@ -2,6 +2,8 @@ FROM osrf/ros:humble-core
 
 # Install packages
 RUN apt-get update && apt-get install -y \
+    ros-humble-desktop-full \
+    python3-colcon-common-extensions \
     build-essential \
     cmake \
     git \
@@ -9,17 +11,20 @@ RUN apt-get update && apt-get install -y \
     ros-humble-image-transport \
     ros-humble-rclcpp \
     ros-humble-std-msgs \
-    libopencv-dev
+    libopencv-dev \
+    && rm -rf /var/lib/apt/lists/*
+
 
 # Setup a ROS2 workspace
-WORKDIR /home/ros2_ws
+WORKDIR /home/ros2_ws/src
+RUN git clone https://github.com/Arif-Anjum/bhf_assessment.git
 
-# Copy the ROS package into the workspace
-COPY ./src /home/ros2_ws/src/
+WORKDIR /home/ros2_ws
 
 # Install dependencies
 RUN . /opt/ros/humble/setup.sh && \
     apt-get update && \
+    rosdep init && \
     rosdep update && \
     rosdep install --from-paths src --ignore-src -r -y
 WORKDIR /home/ros2_ws
@@ -28,11 +33,15 @@ WORKDIR /home/ros2_ws
 RUN . /opt/ros/humble/setup.bash && \
     colcon build
 
-#Source Workspace
-RUN bash -c "source /opt/ros/humble/setup.bash && source /home/ros2_ws/install/setup.bash"
+# Source the ROS 2 and workspace setup scripts
+RUN echo "source /opt/ros/humble/setup.bash" >> ~/.bashrc
+RUN echo "source /home/ros2_ws/install/setup.bash" >> ~/.bashrc
 
 #Entrypoint File
 WORKDIR /home/ros2_ws/src/bhf_assessment/docker
 RUN chmod +x entrypoint.sh
 
 ENTRYPOINT [ "/home/ros2_ws/src/bhf_assessment/docker/entrypoint.sh" ]
+
+# Launch the ROS node
+CMD [ "bash" ]
